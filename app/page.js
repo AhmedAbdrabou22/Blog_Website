@@ -1,95 +1,94 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+import React, { useEffect, useState } from 'react'
+import "@/app/user/user.css"
+import axios from "axios"
+import Link from 'next/link';
+import { FaHeart } from "react-icons/fa";
+import { GrLike } from "react-icons/gr";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaRegArrowAltCircleRight } from "react-icons/fa";
 
-export default function Home() {
+const page = () => {
+  const [post, setPosts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredPosts, setFilteredPosts] = useState([]);
+  const fetchPosts = () => {
+    axios
+      .get('https://662a9c1c44e6a79c2a1cbc6f.mockapi.io/serv/v1/main')
+      .then((res) => {
+        setPosts(res.data);
+        setFilteredPosts(res.data); // Initialize filtered posts with all posts
+      })
+      .catch((error) => console.log(error));
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handleSearch = (e) => {
+    const searchTerm = e.target.value;
+    setSearchTerm(searchTerm);
+
+    // Filter posts based on the search term
+    const filtered = post.filter((post) =>
+      post.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredPosts(filtered);
+  };
+
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <div>
+        <div className='w-75 m-auto text-center'>
+          <input
+            type="text"
+            placeholder="Search by name or category"
+            value={searchTerm}
+            onChange={handleSearch}
+            className='search'
+          />
         </div>
+
+        {filteredPosts.length === 0 ? (
+          <div className='text-center font fs-3'>No posts found.</div>
+        ) : (
+          filteredPosts.map((item) => (
+            <div key={item.id} className="p-4 font shadow post">
+              <div className="d-flex justify-content-between align-items-center">
+                <div  className='d-flex'>
+                  <img src={item.avatar} className="mx-2 profileImage" alt={item.name} />
+                  <div>
+                    <p>{item.name}</p>
+                    <p> Category : {item.category}</p>
+                  </div>
+                </div>
+                <Link href={`/about/${item.id}`}>
+                  <FaRegArrowAltCircleRight />
+                </Link>
+              </div>
+              <div className="mt-3">{item.desc}</div>
+              <div
+                className="reacts"
+                style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}
+              >
+                <div className="mx-3">
+                  {item.likes}
+                  <FaHeart style={{ marginLeft: '10px', color: 'red' }} />
+                </div>
+                <div className="mx-3">
+                  {item.love}
+                  <GrLike style={{ marginLeft: '10px', color: 'blue' }} />
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </>
   )
 }
+
+export default page
